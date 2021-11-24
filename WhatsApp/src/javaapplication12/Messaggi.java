@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class Messaggi {
     
     ArrayList<Messaggio> messaggi;
-    boolean comunicazione;
+    boolean comunicazione;//ascolto->false/invio->true
 
     public Messaggi() {
        messaggi=new ArrayList<Messaggio>();
