@@ -8,9 +8,13 @@ package javaapplication12;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -21,8 +25,16 @@ public class Comunicazione extends Thread {
     boolean comunicazione;
     DatagramSocket server;
     Messaggi messaggi;
-
-    public Comunicazione(Messaggi messaggi) {
+    String nome;
+    String ip;
+    JFrame frame;
+    
+    
+    
+    
+    
+    
+    public Comunicazione(Messaggi messaggi,JFrame frame) {
         this.messaggi = messaggi;
         stato=false;
         comunicazione=true;
@@ -38,14 +50,58 @@ public class Comunicazione extends Thread {
         }
     }
 
+    
+    
+    
+    
     public void setStato(boolean stato) {
         this.stato = stato;
     }
 
+    
+    
+    
+    
     public void setComunicazione(boolean comunicazione) {
         this.comunicazione = comunicazione;
     }            
 
+    
+    public void setComunicazioneInvio(String name,String Ip)
+    {
+        setStato(false);
+        
+        nome=name;
+        ip=Ip;
+
+        //a;NOME_MITTENTE;
+        String risposta = "a"+";"+nome+";";
+        try {
+            server = new DatagramSocket(12349);
+        } catch (SocketException ex) {
+            Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        byte[] responseBuffer = risposta.getBytes();
+
+        DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
+
+        try {
+            responsePacket.setAddress(InetAddress.getByName("172.16.0.0"));
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        responsePacket.setPort(12349);
+
+        try {
+            server.send(responsePacket);
+        } catch (IOException ex) {
+            Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    
+    
     @Override
     public void run() {
         comunicazione = true;
@@ -63,6 +119,15 @@ public class Comunicazione extends Thread {
             String messaggioRicevuto = new String(dataReceived, 0, packet.getLength());
             System.out.println(messaggioRicevuto);
             messaggioRicevuto.trim();
+            
+            String[] vett= messaggioRicevuto.split(";");
+            
+            if(vett[0].equals("a"))
+            {
+                String name = JOptionPane.showInputDialog(frame, "Vuoi accettare la connessione?", null);                
+            }
+                
+            
         }
     }
 
