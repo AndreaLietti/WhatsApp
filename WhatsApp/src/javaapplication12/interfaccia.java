@@ -22,7 +22,7 @@ import javax.swing.JOptionPane;
 public class interfaccia extends javax.swing.JFrame {
 
     Messaggi messaggi = new Messaggi();
-    Comunicazione com = new Comunicazione(messaggi.getInstance(),this);
+    Comunicazione com = new Comunicazione(messaggi.getInstance(), this);
     DatagramSocket server;
 
     public interfaccia() {
@@ -48,6 +48,8 @@ public class interfaccia extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jPanel1 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
+        lblCom = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -82,6 +84,8 @@ public class interfaccia extends javax.swing.JFrame {
             }
         });
 
+        jLabel3.setText("IN COMUNICAZIONE CON:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -101,9 +105,16 @@ public class interfaccia extends javax.swing.JFrame {
                                 .addGap(18, 18, 18)
                                 .addComponent(txtIp, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(bottone, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(133, 133, 133)
-                        .addComponent(jButton1)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(133, 133, 133)
+                                .addComponent(jButton1)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(293, 293, 293)
+                                .addComponent(jLabel3)
+                                .addGap(18, 18, 18)
+                                .addComponent(lblCom, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -119,7 +130,11 @@ public class interfaccia extends javax.swing.JFrame {
                     .addComponent(txtIp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(bottone, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(lblCom, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(bottone, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 664, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(89, Short.MAX_VALUE))
@@ -129,54 +144,62 @@ public class interfaccia extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void bottoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bottoneActionPerformed
-        com.setComunicazione(false);
         String nome = txtNome.getText();
-        String ip = txtIp.getText();
+            String ip = txtIp.getText();
+        if ((com.isStato() == true) && (com.isInComunicazione() == false)) {
+            com.setStato(false);
+            com.setInComunicazione(true);
+            
 
-        //a;NOME_MITTENTE;
-        String risposta = "a"+";"+nome+";";
-        try {
-            server = new DatagramSocket(12349);
-        } catch (SocketException ex) {
-            Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+            //a;NOME_MITTENTE;
+            String risposta = "a" + ";" + nome + ";";
+            try {
+                server = new DatagramSocket();
+            } catch (SocketException ex) {
+                Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            byte[] responseBuffer = risposta.getBytes();
+
+            DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
+
+            try {
+                responsePacket.setAddress(InetAddress.getByName(ip));
+            } catch (UnknownHostException ex) {
+                Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            responsePacket.setPort(12345);
+
+            try {
+                server.send(responsePacket);
+            } catch (IOException ex) {
+                Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            String risposta = "n;";
+            byte[] responseBuffer1 = risposta.getBytes();
+            DatagramPacket responsePacket1 = new DatagramPacket(responseBuffer1, responseBuffer1.length);
+            try {
+                responsePacket1.setAddress(InetAddress.getByName(ip));
+            } catch (UnknownHostException ex) {
+                Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            responsePacket1.setPort(12345);
+            try {
+                server.send(responsePacket1);
+            } catch (IOException ex) {
+                Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
-        byte[] responseBuffer = risposta.getBytes();
 
-        DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
 
-        try {
-            responsePacket.setAddress(InetAddress.getByName("172.16.0.0"));
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        responsePacket.setPort(12349);
-
-        try {
-            server.send(responsePacket);
-        } catch (IOException ex) {
-            Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
     }//GEN-LAST:event_bottoneActionPerformed
 
-    
-    
-    
-    
-    
+
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    
-    
-    
-    
-    
-    
-    
-    
     /**
      * @param args the command line arguments
      */
@@ -217,8 +240,10 @@ public class interfaccia extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblCom;
     private javax.swing.JTextField txtIp;
     private javax.swing.JTextField txtNome;
     // End of variables declaration//GEN-END:variables

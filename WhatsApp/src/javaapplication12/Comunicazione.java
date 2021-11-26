@@ -21,23 +21,23 @@ import javax.swing.JOptionPane;
  * @author lietti_andrea
  */
 public class Comunicazione extends Thread {
+
     boolean stato;//ascolto->true/invio->false
+    boolean inComunicazione;
     boolean comunicazione;
     DatagramSocket server;
     Messaggi messaggi;
     String nome;
     String ip;
     JFrame frame;
-    
-    
-    
-    
-    
-    
-    public Comunicazione(Messaggi messaggi,JFrame frame) {
+    String nomeDest;
+
+    public Comunicazione(Messaggi messaggi, JFrame frame) {
+        nomeDest = "";
         this.messaggi = messaggi;
-        stato=false;
-        comunicazione=true;
+        stato = true;
+        inComunicazione=false;
+        comunicazione = true;
         try {
             server = new DatagramSocket(12345);
         } catch (SocketException ex) {
@@ -50,32 +50,44 @@ public class Comunicazione extends Thread {
         }
     }
 
-    
-    
+    public void setInComunicazione(boolean inComunicazione) {
+        this.inComunicazione = inComunicazione;
+    }
+
+    public String getNomeDest() {
+        return nomeDest;
+    }
+
+    public boolean isStato() {
+        return stato;
+    }
+
+    public boolean isInComunicazione() {
+        return inComunicazione;
+    }
+
+    public boolean isComunicazione() {
+        return comunicazione;
+    }
+
     
     
     public void setStato(boolean stato) {
         this.stato = stato;
     }
 
-    
-    
-    
-    
     public void setComunicazione(boolean comunicazione) {
         this.comunicazione = comunicazione;
-    }            
+    }
 
-    
-    public void setComunicazioneInvio(String name,String Ip)
-    {
-        setStato(false);
-        
-        nome=name;
-        ip=Ip;
+    public void setComunicazioneInvio(String name, String Ip) {
+        /*setStato(false);
+
+        nome = name;
+        ip = Ip;
 
         //a;NOME_MITTENTE;
-        String risposta = "a"+";"+nome+";";
+        String risposta = "a" + ";" + nome + ";";
         try {
             server = new DatagramSocket(12349);
         } catch (SocketException ex) {
@@ -98,10 +110,9 @@ public class Comunicazione extends Thread {
         } catch (IOException ex) {
             Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
         }
+         */
     }
-    
-    
-    
+
     @Override
     public void run() {
         comunicazione = true;
@@ -119,17 +130,70 @@ public class Comunicazione extends Thread {
             String messaggioRicevuto = new String(dataReceived, 0, packet.getLength());
             System.out.println(messaggioRicevuto);
             messaggioRicevuto.trim();
-            
-            String[] vett= messaggioRicevuto.split(";");
-            
-            if(vett[0].equals("a"))
-            {
-                String name = JOptionPane.showInputDialog(frame, "Vuoi accettare la connessione?", null);                
+
+            String[] vett = messaggioRicevuto.split(";");
+
+            if (vett[0].equals("a")) {
+                if(stato==false||inComunicazione==true)
+                {
+                     String risposta = "n;";
+                    byte[] responseBuffer = risposta.getBytes();
+                    DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
+                    responsePacket.setAddress(packet.getAddress());
+                    responsePacket.setPort(12345);
+                    try {
+                        server.send(responsePacket);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Comunicazione.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                else
+                {
+                nomeDest = vett[1];
+                String name = JOptionPane.showInputDialog(frame, "Vuoi accettare la connessione?", null);
+
+                if (name == null) {
+                    String risposta = "n;";
+                    byte[] responseBuffer = risposta.getBytes();
+                    DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
+                    responsePacket.setAddress(packet.getAddress());
+                    responsePacket.setPort(12345);
+                    try {
+                        server.send(responsePacket);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Comunicazione.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                } else {
+                    String risposta = "y;" + name + ";";
+                    byte[] responseBuffer = risposta.getBytes();
+                    DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
+                    responsePacket.setAddress(packet.getAddress());
+                    responsePacket.setPort(12345);
+                    try {
+                        server.send(responsePacket);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Comunicazione.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    
+                    DatagramPacket packet1 = new DatagramPacket(buffer, buffer.length);
+                    try {
+                        server.receive(packet1);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Comunicazione.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    byte[] dataReceived1 = packet1.getData(); // copia del buffer dichiarato sopra
+                    String messaggioRicevuto1 = new String(dataReceived, 0, packet.getLength());
+                    System.out.println(messaggioRicevuto);
+                }
+
             }
-                
-            
+
         }
     }
+    }
+}
 
     /*
     
@@ -146,5 +210,20 @@ String messaggioRicevuto = new String(dataReceived, 0, packet.getLength());
 
 System.out.println(messaggioRicevuto);
     
+    
+    
+    
+    String risposta = "CIAO CLIENT";
+
+byte[] responseBuffer = risposta.getBytes();
+
+DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
+
+responsePacket.setAddress(packet.getAddress());
+
+responsePacket.setPort(packet.getPort());
+
+server.send(responsePacket);
+    
      */
-}
+
