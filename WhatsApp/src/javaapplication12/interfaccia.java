@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -50,6 +51,7 @@ public class interfaccia extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         lblCom = new javax.swing.JLabel();
+        disconnect = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -86,6 +88,13 @@ public class interfaccia extends javax.swing.JFrame {
 
         jLabel3.setText("IN COMUNICAZIONE CON:");
 
+        disconnect.setText("Disconnetti");
+        disconnect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                disconnectActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -111,7 +120,9 @@ public class interfaccia extends javax.swing.JFrame {
                                 .addComponent(jButton1)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(293, 293, 293)
+                                .addGap(26, 26, 26)
+                                .addComponent(disconnect, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(124, 124, 124)
                                 .addComponent(jLabel3)
                                 .addGap(18, 18, 18)
                                 .addComponent(lblCom, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
@@ -131,8 +142,9 @@ public class interfaccia extends javax.swing.JFrame {
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(lblCom, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
+                    .addComponent(disconnect, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(lblCom, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
                         .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(bottone, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)))
                 .addGap(18, 18, 18)
@@ -144,53 +156,82 @@ public class interfaccia extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void bottoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bottoneActionPerformed
-        String nome = txtNome.getText();
-            String ip = txtIp.getText();
         if ((com.isStato() == true) && (com.isInComunicazione() == false)) {
-            com.setStato(false);
-            com.setInComunicazione(true);
+            try {
+                com.ip = InetAddress.getByName(txtIp.getText().trim());
+            } catch (UnknownHostException ex) {
+                Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+            }          
             
-
-            //a;NOME_MITTENTE;
-            String risposta = "a" + ";" + nome + ";";
-            try {
-                server = new DatagramSocket();
-            } catch (SocketException ex) {
-                Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            byte[] responseBuffer = risposta.getBytes();
-
-            DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
-
-            try {
-                responsePacket.setAddress(InetAddress.getByName(ip));
-            } catch (UnknownHostException ex) {
-                Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-            responsePacket.setPort(12345);
-
-            try {
-                server.send(responsePacket);
-            } catch (IOException ex) {
-                Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } else {
-            String risposta = "n;";
-            byte[] responseBuffer1 = risposta.getBytes();
-            DatagramPacket responsePacket1 = new DatagramPacket(responseBuffer1, responseBuffer1.length);
-            try {
-                responsePacket1.setAddress(InetAddress.getByName(ip));
-            } catch (UnknownHostException ex) {
-                Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            responsePacket1.setPort(12345);
-            try {
-                server.send(responsePacket1);
-            } catch (IOException ex) {
-                Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            com.setInComunicazione(true);
+            com.nome = txtNome.getText();
+            com.setStato(false);
+            
+            
+            
+             
         }
+
+           
+            /*if ((com.isStato() == true) && (com.isInComunicazione() == false)) {
+                com.setStato(false);
+                com.setInComunicazione(true);
+
+                //a;NOME_MITTENTE;
+                String risposta = "a;" + nome + ";";
+                try {
+                    server = new DatagramSocket();
+                } catch (SocketException ex) {
+                    Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                byte[] responseBuffer = risposta.getBytes();
+
+                DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
+
+                try {
+                    responsePacket.setAddress(InetAddress.getByName(ip));
+                } catch (UnknownHostException ex) {
+                    Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                responsePacket.setPort(12345);
+
+                try {
+                    server.send(responsePacket);
+                } catch (IOException ex) {
+                    Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+                }
+//////////////////////////////////////////////
+                System.out.println(com.getMess());
+                String vett[] = com.getMess().split(";");
+                if (vett[0].equals("y")) {
+
+                    String risposta1 = "y;";
+                    byte[] responseBuffer1 = risposta1.getBytes();
+                    DatagramPacket responsePacket1 = new DatagramPacket(responseBuffer1, responseBuffer1.length);
+                    responsePacket1.setAddress(com.getIp());
+                    responsePacket1.setPort(12345);
+                    try {
+                        server.send(responsePacket1);
+                    } catch (IOException ex) {
+                        Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    com.startChat(jPanel1);
+                }
+*/
+             else {
+                String risposta = "n;";
+                byte[] responseBuffer1 = risposta.getBytes();
+                DatagramPacket responsePacket1 = new DatagramPacket(responseBuffer1, responseBuffer1.length);
+                responsePacket1.setAddress(com.ip);
+                responsePacket1.setPort(12345);
+                try {
+                    server.send(responsePacket1);
+                } catch (IOException ex) {
+                    Logger.getLogger(interfaccia.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
 
 
     }//GEN-LAST:event_bottoneActionPerformed
@@ -199,6 +240,15 @@ public class interfaccia extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
 
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void disconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectActionPerformed
+        // TODO add your handling code here:
+        com.setChat();
+    }//GEN-LAST:event_disconnectActionPerformed
+
+    public javax.swing.JPanel getPanel() {
+        return jPanel1;
+    }
 
     /**
      * @param args the command line arguments
@@ -235,8 +285,10 @@ public class interfaccia extends javax.swing.JFrame {
         });
     }
 
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bottone;
+    private javax.swing.JButton disconnect;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
